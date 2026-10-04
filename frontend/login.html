@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MédiDiag - Connexion</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal: #0d9488;
+    --teal-light: #14b8a6;
+    --teal-dark: #0f766e;
+    --navy: #0f172a;
+    --navy-mid: #1e293b;
+    --slate: #334155;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --error: #f87171;
+    --success: #34d399;
+    --glass: rgba(15,23,42,0.7);
+    --glass-border: rgba(20,184,166,0.2);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--navy);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+  .bg-canvas {
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(13,148,136,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(6,182,212,0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 60% 80%, rgba(15,118,110,0.12) 0%, transparent 50%),
+                linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  }
+  .grid-overlay {
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(20,184,166,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(20,184,166,0.04) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+  .blob {
+    position: fixed; border-radius: 50%; filter: blur(80px); z-index: 0;
+    animation: float 8s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .blob-1 { width:400px; height:400px; top:-100px; left:-100px; background: rgba(13,148,136,0.12); }
+  .blob-2 { width:300px; height:300px; bottom:-50px; right:-50px; background: rgba(6,182,212,0.08); animation-delay: -3s; }
+  .blob-3 { width:200px; height:200px; top:50%; left:60%; background: rgba(20,184,166,0.06); animation-delay: -6s; }
+  @keyframes float {
+    0%,100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.05); }
+  }
+  .container {
+    position: relative; z-index: 10;
+    width: 100%; max-width: 440px;
+    padding: 20px;
+  }
+  .logo {
+    text-align: center; margin-bottom: 32px;
+    animation: fadeDown 0.6s ease both;
+  }
+  .logo-icon {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-light));
+    border-radius: 18px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 30px; margin-bottom: 12px;
+    box-shadow: 0 0 30px rgba(13,148,136,0.4);
+  }
+  .logo h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px; color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .logo p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+  .card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 40px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03);
+    animation: fadeUp 0.6s ease 0.1s both;
+  }
+  .card-title { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .card-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; }
+  .form-group { margin-bottom: 18px; }
+  .form-label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 8px; }
+  .form-input {
+    width: 100%; padding: 13px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    color: var(--text); font-family: 'Outfit', sans-serif;
+    font-size: 15px; outline: none;
+    transition: all 0.2s;
+  }
+  .form-input::placeholder { color: rgba(148,163,184,0.5); }
+  .form-input:focus {
+    border-color: var(--teal);
+    background: rgba(13,148,136,0.08);
+    box-shadow: 0 0 0 3px rgba(13,148,136,0.15);
+  }
+  .btn-primary {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg, var(--teal-dark), var(--teal-light));
+    border: none; border-radius: 12px;
+    color: white; font-family: 'Outfit', sans-serif;
+    font-size: 16px; font-weight: 600;
+    cursor: pointer; margin-top: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(13,148,136,0.35);
+    position: relative; overflow: hidden;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 25px rgba(13,148,136,0.5); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .link-row {
+    text-align: center; margin-top: 18px;
+    font-size: 14px; color: var(--text-muted);
+  }
+  .link-row a { color: var(--teal-light); text-decoration: none; font-weight: 500; transition: color 0.2s; }
+  .link-row a:hover { color: white; }
+
+  /* ALERTS */
+  .alert {
+    padding: 14px 16px; border-radius: 10px;
+    font-size: 14px; margin-bottom: 16px;
+    display: none; line-height: 1.5;
+  }
+  .alert-error {
+    background: rgba(248,113,113,0.1);
+    border: 1px solid rgba(248,113,113,0.3);
+    color: #fca5a5;
+  }
+  .alert-warning {
+    background: rgba(251,146,60,0.1);
+    border: 1px solid rgba(251,146,60,0.3);
+    color: #fdba74;
+  }
+  .alert-blocked {
+    background: rgba(239,68,68,0.15);
+    border: 1px solid rgba(239,68,68,0.4);
+    color: #fca5a5;
+    font-weight: 500;
+  }
+  .alert.show { display: block; animation: fadeUp 0.3s ease; }
+
+  /* TENTATIVES RESTANTES */
+  .attempts-bar {
+    display: none; margin-bottom: 16px;
+  }
+  .attempts-bar.show { display: block; }
+  .attempts-label {
+    font-size: 12px; color: var(--text-muted);
+    margin-bottom: 6px; display: flex; justify-content: space-between;
+  }
+  .attempts-dots { display: flex; gap: 6px; }
+  .dot {
+    width: 28px; height: 8px; border-radius: 4px;
+    background: rgba(255,255,255,0.1);
+    transition: all 0.3s;
+  }
+  .dot.active { background: #f87171; box-shadow: 0 0 8px rgba(248,113,113,0.5); }
+
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  .spinner {
+    display: inline-block; width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white; border-radius: 50%;
+    animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .lang-switcher {
+    position: fixed; top: 20px; right: 20px; z-index: 100;
+    display: flex; gap: 8px;
+  }
+  .lang-btn {
+    padding: 6px 12px; border-radius: 8px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-muted); font-size: 12px; cursor: pointer;
+    transition: all 0.2s; font-family: 'Outfit', sans-serif;
+  }
+  .lang-btn.active, .lang-btn:hover {
+    background: rgba(13,148,136,0.2); border-color: var(--teal); color: var(--teal-light);
+  }
+  .lock-icon {
+    font-size: 40px; text-align: center;
+    margin-bottom: 10px; display: none;
+  }
+  .lock-icon.show { display: block; animation: fadeUp 0.3s ease; }
+</style>
+</head>
+<body>
+<div class="bg-canvas"></div>
+<div class="grid-overlay"></div>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<div class="lang-switcher">
+  <button class="lang-btn active" onclick="setLang('fr', event)">🇫🇷 FR</button>
+  <button class="lang-btn" onclick="setLang('ar', event)">🇲🇦 AR</button>
+  <button class="lang-btn" onclick="setLang('en', event)">🇬🇧 EN</button>
+</div>
+
+<div class="container">
+  <div class="logo">
+    <div class="logo-icon">🏥</div>
+    <h1>MédiDiag</h1>
+    <p data-i18n="tagline">Analyse médicale intelligente</p>
+  </div>
+
+  <div class="card">
+    <div class="lock-icon" id="lockIcon">🔒</div>
+    <h2 class="card-title" data-i18n="welcome">Bienvenue</h2>
+    <p class="card-subtitle" data-i18n="subtitle">Connectez-vous à votre espace médical</p>
+
+    <!-- ALERTE ERREUR NORMALE -->
+    <div class="alert alert-error" id="alertError"></div>
+
+    <!-- ALERTE TENTATIVES RESTANTES -->
+    <div class="alert alert-warning" id="alertWarning"></div>
+
+    <!-- ALERTE COMPTE BLOQUÉ -->
+    <div class="alert alert-blocked" id="alertBlocked"></div>
+
+    <!-- BARRE DE TENTATIVES -->
+    <div class="attempts-bar" id="attemptsBar">
+      <div class="attempts-label">
+        <span>Tentatives échouées</span>
+        <span id="attemptsCount">0 / 3</span>
+      </div>
+      <div class="attempts-dots">
+        <div class="dot" id="dot1"></div>
+        <div class="dot" id="dot2"></div>
+        <div class="dot" id="dot3"></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" data-i18n="username">Nom d'utilisateur</label>
+      <input type="text" id="username" class="form-input"
+             placeholder="Votre identifiant" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label class="form-label" data-i18n="password">Mot de passe</label>
+      <input type="password" id="password" class="form-input"
+             placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <button class="btn-primary" id="loginBtn" onclick="doLogin()">
+      <span id="loginBtnText" data-i18n="login-btn">Se connecter</span>
+    </button>
+
+    <div class="link-row">
+      <span data-i18n="no-account">Pas de compte ?</span>
+      <a href="signup.html" data-i18n="signup-link"> Créer un compte</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://127.0.0.1:5000/api';
+
+const LANGS = {
+  fr: {
+    tagline: 'Analyse médicale intelligente',
+    welcome: 'Bienvenue',
+    subtitle: 'Connectez-vous à votre espace médical',
+    username: "Nom d'utilisateur",
+    password: 'Mot de passe',
+    'login-btn': 'Se connecter',
+    'no-account': 'Pas de compte ?',
+    'signup-link': ' Créer un compte',
+    connecting: 'Connexion...',
+    'err-fill': 'Veuillez remplir tous les champs.'
+  },
+  en: {
+    tagline: 'Intelligent medical analysis',
+    welcome: 'Welcome Back',
+    subtitle: 'Sign in to your medical space',
+    username: 'Username',
+    password: 'Password',
+    'login-btn': 'Sign In',
+    'no-account': "Don't have an account?",
+    'signup-link': ' Create account',
+    connecting: 'Connecting...',
+    'err-fill': 'Please fill all fields.'
+  },
+  ar: {
+    tagline: 'تحليل طبي ذكي',
+    welcome: 'مرحباً',
+    subtitle: 'سجّل الدخول إلى مساحتك الطبية',
+    username: 'اسم المستخدم',
+    password: 'كلمة المرور',
+    'login-btn': 'تسجيل الدخول',
+    'no-account': 'ليس لديك حساب؟',
+    'signup-link': ' إنشاء حساب',
+    connecting: 'جارٍ الاتصال...',
+    'err-fill': 'يرجى ملء جميع الحقول.'
+  }
+};
+
+let currentLang = localStorage.getItem('lang') || 'fr';
+let failedAttempts = 0;
+
+function setLang(lang, event) {
+  currentLang = lang;
+  localStorage.setItem('lang', lang);
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  if (event && event.target) event.target.classList.add('active');
+  document.body.style.direction = lang === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (LANGS[lang] && LANGS[lang][key]) el.textContent = LANGS[lang][key];
+  });
+}
+
+function t(key) { return (LANGS[currentLang] && LANGS[currentLang][key]) || LANGS.fr[key] || key; }
+
+function hideAllAlerts() {
+  document.getElementById('alertError').classList.remove('show');
+  document.getElementById('alertWarning').classList.remove('show');
+  document.getElementById('alertBlocked').classList.remove('show');
+}
+
+function showError(msg) {
+  hideAllAlerts();
+  const el = document.getElementById('alertError');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function showWarning(msg) {
+  hideAllAlerts();
+  const el = document.getElementById('alertWarning');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function showBlocked(msg) {
+  hideAllAlerts();
+  // Afficher icône cadenas
+  document.getElementById('lockIcon').classList.add('show');
+  const el = document.getElementById('alertBlocked');
+  el.textContent = msg;
+  el.classList.add('show');
+  // Désactiver les champs
+  document.getElementById('username').disabled = true;
+  document.getElementById('password').disabled = true;
+  document.getElementById('loginBtn').disabled = true;
+  document.getElementById('loginBtnText').textContent = '🔒 Compte bloqué 24h';
+}
+
+function updateAttemptsDots(count) {
+  const bar = document.getElementById('attemptsBar');
+  bar.classList.add('show');
+  document.getElementById('attemptsCount').textContent = `${count} / 3`;
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById(`dot${i}`);
+    dot.classList.toggle('active', i <= count);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+async function doLogin() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+
+  if (!username || !password) {
+    showError(t('err-fill')); return;
+  }
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  document.getElementById('loginBtnText').innerHTML =
+    `<span class="spinner"></span>${t('connecting')}`;
+
+  try {
+    const res = await fetch(`${API}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+
+    if (res.status === 403) {
+      // ===== COMPTE BLOQUÉ =====
+      failedAttempts = 3;
+      updateAttemptsDots(3);
+      showBlocked(data.error);
+      return;
+    }
+
+    if (res.status === 401) {
+      // ===== MOT DE PASSE INCORRECT =====
+      failedAttempts++;
+      updateAttemptsDots(failedAttempts);
+      showWarning(data.error);
+      // Vider le champ mot de passe
+      document.getElementById('password').value = '';
+      document.getElementById('password').focus();
+      return;
+    }
+
+    if (!res.ok) {
+      showError(data.error || 'Erreur de connexion');
+      return;
+    }
+
+    // ===== CONNEXION RÉUSSIE =====
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    window.location.href = 'form.html';
+
+  } catch(e) {
+    showError('Erreur de connexion au serveur. Vérifiez que le serveur est lancé.');
+  } finally {
+    if (!document.getElementById('loginBtn').disabled ||
+        document.getElementById('loginBtnText').textContent !== '🔒 Compte bloqué 24h') {
+      btn.disabled = false;
+      document.getElementById('loginBtnText').textContent = t('login-btn');
+    }
+  }
+}
+
+// Init langue
+setLang(currentLang, null);
+document.querySelectorAll('.lang-btn').forEach((b, i) => {
+  const langs = ['fr', 'ar', 'en'];
+  b.classList.toggle('active', langs[i] === currentLang);
+});
+</script>
+</body>
+</html>

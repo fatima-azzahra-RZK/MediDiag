@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MédiDiag - Résultats</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal:#0d9488; --teal-light:#14b8a6; --teal-dark:#0f766e;
+    --navy:#0f172a; --navy-mid:#1e293b; --text:#e2e8f0; --text-muted:#94a3b8;
+    --card-bg:rgba(30,41,59,0.85); --glass-border:rgba(20,184,166,0.15);
+    --critical:#f87171; --high:#fb923c; --medium:#facc15; --low:#34d399;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Outfit',sans-serif;
+    background: linear-gradient(135deg,#0f172a 0%,#1e293b 100%);
+    min-height:100vh; color:var(--text);
+  }
+  .bg-fixed {
+    position:fixed; inset:0; pointer-events:none;
+    background: radial-gradient(ellipse at 20% 40%, rgba(13,148,136,0.1) 0%, transparent 55%);
+  }
+  nav {
+    position:sticky; top:0; z-index:100;
+    background:rgba(15,23,42,0.9); backdrop-filter:blur(20px);
+    border-bottom:1px solid rgba(20,184,166,0.1);
+    padding:0 24px; height:64px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .nav-brand { display:flex; align-items:center; gap:10px; }
+  .nav-icon { width:36px; height:36px; background:linear-gradient(135deg,var(--teal-dark),var(--teal-light)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .nav-title { font-family:'DM Serif Display',serif; font-size:20px; }
+  .nav-right { display:flex; gap:8px; }
+  .nav-btn { padding:8px 14px; border-radius:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:var(--text-muted); font-family:'Outfit',sans-serif; font-size:13px; cursor:pointer; transition:all 0.2s; text-decoration:none; display:flex; align-items:center; gap:6px; }
+  .nav-btn:hover { background:rgba(13,148,136,0.15); border-color:var(--teal); color:var(--teal-light); }
+  
+  main { max-width:900px; margin:0 auto; padding:32px 24px; position:relative; z-index:1; }
+  
+  /* HEADER */
+  .result-header {
+    text-align:center; margin-bottom:40px;
+    animation: fadeDown 0.6s ease;
+  }
+  .result-header h1 { font-family:'DM Serif Display',serif; font-size:36px; margin-bottom:8px; }
+  .result-header p { color:var(--text-muted); font-size:15px; }
+  .result-badge {
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 20px; border-radius:20px; margin-bottom:16px;
+    font-size:14px; font-weight:600;
+  }
+  .badge-critical { background:rgba(248,113,113,0.15); border:1px solid rgba(248,113,113,0.3); color:#fca5a5; }
+  .badge-high { background:rgba(251,146,60,0.15); border:1px solid rgba(251,146,60,0.3); color:#fdba74; }
+  .badge-medium { background:rgba(250,204,21,0.15); border:1px solid rgba(250,204,21,0.3); color:#fde047; }
+  .badge-low { background:rgba(52,211,153,0.15); border:1px solid rgba(52,211,153,0.3); color:#6ee7b7; }
+  
+  /* BMI CARD */
+  .bmi-summary {
+    background:var(--card-bg); border:1px solid var(--glass-border);
+    border-radius:16px; padding:20px 24px; margin-bottom:24px;
+    display:flex; align-items:center; gap:24px;
+    animation: fadeUp 0.5s ease 0.1s both;
+  }
+  .bmi-big { font-size:42px; font-weight:700; color:var(--teal-light); }
+  .bmi-info { flex:1; }
+  .bmi-label { font-size:12px; color:var(--text-muted); margin-bottom:4px; }
+  .bmi-cat { font-size:16px; font-weight:600; }
+  .bmi-bar { height:8px; border-radius:4px; margin-top:10px; background:rgba(255,255,255,0.08); overflow:hidden; position:relative; }
+  .bmi-fill { height:100%; border-radius:4px; transition:width 1s ease; }
+  .bmi-markers { display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-top:4px; }
+  
+  /* DISEASE CARDS */
+  .disease-list { display:flex; flex-direction:column; gap:16px; margin-bottom:32px; }
+  
+  .disease-card {
+    background:var(--card-bg); border-radius:20px; overflow:hidden;
+    border:1px solid rgba(255,255,255,0.06);
+    animation: fadeUp 0.5s ease both;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .disease-card:hover { transform:translateY(-2px); box-shadow:0 12px 40px rgba(0,0,0,0.4); }
+  .disease-card:nth-child(1) { animation-delay:0.15s; }
+  .disease-card:nth-child(2) { animation-delay:0.25s; }
+  .disease-card:nth-child(3) { animation-delay:0.35s; }
+  
+  .disease-card.urgency-critical { border-color:rgba(248,113,113,0.3); }
+  .disease-card.urgency-high { border-color:rgba(251,146,60,0.25); }
+  .disease-card.urgency-medium { border-color:rgba(250,204,21,0.2); }
+  .disease-card.urgency-low { border-color:rgba(52,211,153,0.25); }
+  
+  .disease-header {
+    padding:20px 24px;
+    display:flex; align-items:center; gap:16px;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+  }
+  .disease-icon { font-size:36px; }
+  .disease-info { flex:1; }
+  .disease-name { font-size:20px; font-weight:700; color:var(--text); margin-bottom:4px; }
+  .disease-desc { font-size:13px; color:var(--text-muted); line-height:1.5; }
+  .confidence-wrap { text-align:right; min-width:90px; }
+  .confidence-pct {
+    font-size:32px; font-weight:700;
+    background:linear-gradient(135deg,var(--teal-light),#67e8f9);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .confidence-label { font-size:11px; color:var(--text-muted); }
+  .confidence-bar { height:4px; border-radius:2px; background:rgba(255,255,255,0.08); margin-top:6px; }
+  .confidence-fill { height:100%; border-radius:2px; background:linear-gradient(90deg,var(--teal-dark),var(--teal-light)); }
+  
+  .disease-body { padding:20px 24px; }
+  .reco-title { font-size:13px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; }
+  .reco-list { display:flex; flex-direction:column; gap:8px; }
+  .reco-item {
+    display:flex; align-items:flex-start; gap:10px;
+    padding:10px 14px; border-radius:10px;
+    background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05);
+    font-size:13px; color:var(--text-muted); line-height:1.5;
+  }
+  .reco-item::before { content:'→'; color:var(--teal-light); font-weight:700; flex-shrink:0; }
+  
+  /* URGENCY TAG */
+  .urgency-tag {
+    padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.5px;
+  }
+  .tag-critical { background:rgba(248,113,113,0.2); color:#fca5a5; }
+  .tag-high { background:rgba(251,146,60,0.2); color:#fdba74; }
+  .tag-medium { background:rgba(250,204,21,0.2); color:#fde047; }
+  .tag-low { background:rgba(52,211,153,0.2); color:#6ee7b7; }
+  
+  /* DISCLAIMER */
+  .disclaimer {
+    background:rgba(250,204,21,0.05); border:1px solid rgba(250,204,21,0.15);
+    border-radius:14px; padding:18px 22px; margin-bottom:24px;
+    display:flex; gap:14px; align-items:flex-start;
+    animation: fadeUp 0.5s ease 0.4s both;
+  }
+  .disclaimer-icon { font-size:22px; flex-shrink:0; }
+  .disclaimer-text { font-size:13px; color:#fde047; line-height:1.6; opacity:0.85; }
+  
+  /* ACTION BUTTONS */
+  .action-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:8px; }
+  .btn-action {
+    padding:13px 24px; border-radius:12px; font-family:'Outfit',sans-serif;
+    font-size:15px; font-weight:600; cursor:pointer; transition:all 0.2s;
+    text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn-primary { background:linear-gradient(135deg,var(--teal-dark),var(--teal-light)); color:white; border:none; box-shadow:0 4px 20px rgba(13,148,136,0.35); }
+  .btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 25px rgba(13,148,136,0.5); }
+  .btn-secondary { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); }
+  .btn-secondary:hover { background:rgba(255,255,255,0.1); color:var(--text); }
+  
+  @keyframes fadeDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+<div class="bg-fixed"></div>
+ 
+<nav>
+  <div class="nav-brand">
+    <div class="nav-icon">🏥</div>
+    <span class="nav-title">MédiDiag</span>
+  </div>
+  <div class="nav-right">
+    <a href="form.html" class="nav-btn">📝 Nouvelle analyse</a>
+    <a href="dashboard.html" class="nav-btn">📊 Historique</a>
+    <button class="nav-btn" onclick="printResults()" style="border:none">🖨️ Imprimer</button>
+  </div>
+</nav>
+ 
+<main>
+  <div id="resultsContainer">
+    <div style="text-align:center;padding:60px;color:var(--text-muted)">
+      <div style="font-size:40px;margin-bottom:12px">⏳</div>
+      Chargement des résultats...
+    </div>
+  </div>
+</main>
+ 
+<script>
+const result = JSON.parse(localStorage.getItem('lastResult') || 'null');
+ 
+if (!result) {
+  window.location.href = 'form.html';
+}
+ 
+const URGENCY_LABELS = {
+  critical: '🚨 Urgence médicale',
+  high: '⚠️ Attention requise',
+  medium: '🔶 Surveillance conseillée',
+  low: '✅ État stable'
+};
+ 
+function getBMICategory(bmi) {
+  if (bmi < 18.5) return { cat: 'Insuffisance pondérale', color: '#60a5fa', pct: Math.max(5, bmi/40*100) };
+  if (bmi < 25)   return { cat: 'Poids normal', color: '#34d399', pct: bmi/40*100 };
+  if (bmi < 30)   return { cat: 'Surpoids', color: '#facc15', pct: bmi/40*100 };
+  if (bmi < 35)   return { cat: 'Obésité modérée', color: '#fb923c', pct: bmi/40*100 };
+  return { cat: 'Obésité sévère', color: '#f87171', pct: Math.min(98, bmi/40*100) };
+}
+ 
+function renderResults() {
+  if (!result) return;
+  
+  const predictions = result.predictions || [];
+  const bmi = result.bmi;
+  const bmiInfo = getBMICategory(bmi);
+  const topUrgency = predictions[0]?.urgency || 'low';
+  
+  const badgeClass = `badge-${topUrgency}`;
+  const badgeLabel = URGENCY_LABELS[topUrgency] || '✅ État stable';
+  
+  const bmiSection = `
+    <div class="bmi-summary">
+      <div class="bmi-big">${bmi}</div>
+      <div class="bmi-info">
+        <div class="bmi-label">Votre Indice de Masse Corporelle</div>
+        <div class="bmi-cat" style="color:${bmiInfo.color}">${bmiInfo.cat}</div>
+        <div class="bmi-bar">
+          <div class="bmi-fill" id="bmiFill" style="width:0;background:${bmiInfo.color}"></div>
+        </div>
+        <div class="bmi-markers">
+          <span>Insuffisant<br>(&lt;18.5)</span>
+          <span>Normal<br>(18.5-25)</span>
+          <span>Surpoids<br>(25-30)</span>
+          <span>Obésité<br>(&gt;30)</span>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  const diseasesHTML = predictions.map(p => `
+    <div class="disease-card urgency-${p.urgency}">
+      <div class="disease-header">
+        <div class="disease-icon">${p.icon}</div>
+        <div class="disease-info">
+          <div class="disease-name">${p.name}</div>
+          <div class="disease-desc">${p.description}</div>
+          <div style="margin-top:8px">
+            <span class="urgency-tag tag-${p.urgency}">${URGENCY_LABELS[p.urgency]}</span>
+          </div>
+        </div>
+        <div class="confidence-wrap">
+          <div class="confidence-pct">${p.confidence}%</div>
+          <div class="confidence-label">Probabilité</div>
+          <div class="confidence-bar">
+            <div class="confidence-fill" style="width:${p.confidence}%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="disease-body">
+        <div class="reco-title">📋 Recommandations</div>
+        <div class="reco-list">
+          ${p.recommendations.map(r => `<div class="reco-item">${r}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('');
+  
+  document.getElementById('resultsContainer').innerHTML = `
+    <div class="result-header">
+      <div class="result-badge ${badgeClass}">${badgeLabel}</div>
+      <h1>Résultats de votre analyse</h1>
+      <p>Basé sur les données que vous avez fournies</p>
+    </div>
+    
+    ${bmiSection}
+    
+    <div class="disease-list">${diseasesHTML}</div>
+    
+    <div class="disclaimer">
+      <div class="disclaimer-icon">⚠️</div>
+      <div class="disclaimer-text">
+        <strong>Avertissement important :</strong> Ces résultats sont générés par un algorithme d'analyse et ne remplacent en aucun cas un diagnostic médical professionnel. 
+        Consultez toujours un médecin qualifié pour obtenir un diagnostic fiable et un traitement approprié. 
+        En cas de symptômes graves, appelez immédiatement le 15 (SAMU) ou rendez-vous aux urgences.
+      </div>
+    </div>
+    
+    <div class="action-row">
+      <a href="form.html" class="btn-action btn-primary">📝 Nouvelle analyse</a>
+      <a href="dashboard.html" class="btn-action btn-secondary">📊 Voir l'historique</a>
+      <button class="btn-action btn-secondary" onclick="printResults()">🖨️ Imprimer</button>
+    </div>
+  `;
+  
+  // Animate BMI bar
+  setTimeout(() => {
+    const fill = document.getElementById('bmiFill');
+    if (fill) fill.style.width = Math.min(98, bmiInfo.pct) + '%';
+  }, 300);
+}
+ 
+function printResults() { window.print(); }
+ 
+renderResults();
+</script>
+</body>
+</html>

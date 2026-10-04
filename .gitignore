@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pyc
+users.json
+history.json
+attempts.json
+.env

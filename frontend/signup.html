@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MédiDiag - Créer un compte</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal: #0d9488; --teal-light: #14b8a6; --teal-dark: #0f766e;
+    --navy: #0f172a; --text: #e2e8f0; --text-muted: #94a3b8;
+    --glass: rgba(15,23,42,0.75); --glass-border: rgba(20,184,166,0.2);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: radial-gradient(ellipse at 20% 50%, rgba(13,148,136,0.15) 0%, transparent 60%),
+                linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    min-height: 100vh; display: flex; align-items: center;
+    justify-content: center; padding: 20px;
+  }
+  .grid-overlay {
+    position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(20,184,166,0.04) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(20,184,166,0.04) 1px, transparent 1px);
+    background-size: 50px 50px; pointer-events: none;
+  }
+  .container { position: relative; z-index: 10; width:100%; max-width:460px; }
+  .logo { text-align:center; margin-bottom:28px; }
+  .logo-icon {
+    width:56px; height:56px;
+    background: linear-gradient(135deg, var(--teal-dark), var(--teal-light));
+    border-radius:16px; display:inline-flex; align-items:center; justify-content:center;
+    font-size:26px; margin-bottom:10px;
+    box-shadow: 0 0 30px rgba(13,148,136,0.4);
+  }
+  .logo h1 { font-family:'DM Serif Display',serif; font-size:26px; color:var(--text); }
+  .card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px; padding: 36px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+  }
+  .card-title { font-size:20px; font-weight:600; color:var(--text); margin-bottom:4px; }
+  .card-subtitle { font-size:13px; color:var(--text-muted); margin-bottom:24px; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+  .form-group { margin-bottom:14px; }
+  .form-label { display:block; font-size:12px; font-weight:500; color:var(--text-muted); margin-bottom:6px; }
+  .form-input {
+    width:100%; padding:12px 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius:10px; color:var(--text);
+    font-family:'Outfit',sans-serif; font-size:14px; outline:none;
+    transition:all 0.2s;
+  }
+  .form-input::placeholder { color:rgba(148,163,184,0.5); }
+  .form-input:focus {
+    border-color:var(--teal);
+    background: rgba(13,148,136,0.08);
+    box-shadow: 0 0 0 3px rgba(13,148,136,0.15);
+  }
+  .form-input.error { border-color: #f87171; }
+  .password-wrapper { position:relative; }
+  .toggle-pwd {
+    position:absolute; right:12px; top:50%; transform:translateY(-50%);
+    background:none; border:none; color:var(--text-muted); cursor:pointer;
+    font-size:16px;
+  }
+  .strength-bar {
+    height:3px; border-radius:2px; margin-top:6px;
+    background: rgba(255,255,255,0.1); overflow:hidden;
+  }
+  .strength-fill { height:100%; border-radius:2px; transition:all 0.3s; width:0; }
+  .strength-text { font-size:11px; margin-top:4px; }
+  .btn-primary {
+    width:100%; padding:13px;
+    background: linear-gradient(135deg, var(--teal-dark), var(--teal-light));
+    border:none; border-radius:12px; color:white;
+    font-family:'Outfit',sans-serif; font-size:15px; font-weight:600;
+    cursor:pointer; margin-top:8px; transition:all 0.2s;
+    box-shadow: 0 4px 20px rgba(13,148,136,0.35);
+  }
+  .btn-primary:hover { transform:translateY(-1px); box-shadow: 0 6px 25px rgba(13,148,136,0.5); }
+  .btn-primary:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+  .link-row { text-align:center; margin-top:16px; font-size:13px; color:var(--text-muted); }
+  .link-row a { color:var(--teal-light); text-decoration:none; font-weight:500; }
+  .link-row a:hover { color:white; }
+  .alert { padding:12px 16px; border-radius:10px; font-size:13px; margin-bottom:14px; display:none; }
+  .alert-error { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:#fca5a5; }
+  .alert-success { background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3); color:#6ee7b7; }
+  .alert.show { display:block; }
+  .spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; margin-right:6px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="grid-overlay"></div>
+<div class="container">
+  <div class="logo">
+    <div class="logo-icon">🏥</div>
+    <h1>MédiDiag</h1>
+  </div>
+  <div class="card">
+    <h2 class="card-title">Créer un compte</h2>
+    <p class="card-subtitle">Rejoignez MédiDiag pour analyser votre santé</p>
+    
+    <div class="alert alert-error" id="alertError"></div>
+    <div class="alert alert-success" id="alertSuccess"></div>
+    
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Prénom & Nom</label>
+        <input type="text" id="fullName" class="form-input" placeholder="Dr. Dupont">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nom d'utilisateur *</label>
+        <input type="text" id="username" class="form-input" placeholder="dupont123">
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">Email *</label>
+      <input type="email" id="email" class="form-input" placeholder="exemple@email.com">
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">Mot de passe *</label>
+      <div class="password-wrapper">
+        <input type="password" id="password" class="form-input" placeholder="Min. 6 caractères" oninput="checkStrength(this.value)">
+        <button class="toggle-pwd" onclick="togglePwd('password')">👁</button>
+      </div>
+      <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+      <div class="strength-text" id="strengthText"></div>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">Confirmer le mot de passe *</label>
+      <div class="password-wrapper">
+        <input type="password" id="confirmPassword" class="form-input" placeholder="Répétez le mot de passe">
+        <button class="toggle-pwd" onclick="togglePwd('confirmPassword')">👁</button>
+      </div>
+    </div>
+    
+    <button class="btn-primary" id="signupBtn" onclick="doSignup()">
+      Créer mon compte
+    </button>
+    
+    <div class="link-row">
+      Déjà un compte ? <a href="login.html">Se connecter</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://127.0.0.1:5000/api';
+
+function togglePwd(id) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function checkStrength(val) {
+  const fill = document.getElementById('strengthFill');
+  const text = document.getElementById('strengthText');
+  let score = 0;
+  if (val.length >= 6) score++;
+  if (val.length >= 10) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+  
+  const levels = [
+    { pct:0, color:'transparent', label:'' },
+    { pct:20, color:'#f87171', label:'Très faible' },
+    { pct:40, color:'#fb923c', label:'Faible' },
+    { pct:60, color:'#facc15', label:'Moyen' },
+    { pct:80, color:'#4ade80', label:'Fort' },
+    { pct:100, color:'#34d399', label:'Très fort' }
+  ];
+  const l = levels[score] || levels[0];
+  fill.style.width = l.pct + '%';
+  fill.style.background = l.color;
+  text.textContent = l.label;
+  text.style.color = l.color;
+}
+
+function showMsg(type, msg) {
+  const id = type === 'error' ? 'alertError' : 'alertSuccess';
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 5000);
+}
+
+async function doSignup() {
+  const username = document.getElementById('username').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const confirm = document.getElementById('confirmPassword').value;
+  const fullName = document.getElementById('fullName').value.trim();
+  
+  if (!username || !email || !password) {
+    showMsg('error', 'Veuillez remplir tous les champs obligatoires (*)'); return;
+  }
+  if (password !== confirm) {
+    showMsg('error', 'Les mots de passe ne correspondent pas'); return;
+  }
+  if (password.length < 6) {
+    showMsg('error', 'Mot de passe trop court (minimum 6 caractères)'); return;
+  }
+  if (!/\S+@\S+\.\S+/.test(email)) {
+    showMsg('error', 'Adresse email invalide'); return;
+  }
+  
+  const btn = document.getElementById('signupBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Création...';
+  
+  try {
+    const res = await fetch(`${API}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, email, password, full_name: fullName })
+    });
+    const data = await res.json();
+    
+    if (!res.ok) {
+      showMsg('error', data.error || 'Erreur lors de la création du compte');
+      return;
+    }
+    
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    showMsg('success', 'Compte créé ! Redirection...');
+    setTimeout(() => window.location.href = 'form.html', 1500);
+  } catch(e) {
+    showMsg('error', 'Erreur de connexion au serveur.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Créer mon compte';
+  }
+}
+</script>
+</body>
+</html>

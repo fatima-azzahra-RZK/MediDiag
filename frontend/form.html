@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MédiDiag - Formulaire Médical</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal: #0d9488; --teal-light: #14b8a6; --teal-dark: #0f766e;
+    --navy: #0f172a; --navy-mid: #1e293b; --slate: #334155;
+    --text: #e2e8f0; --text-muted: #94a3b8;
+    --glass: rgba(15,23,42,0.7); --glass-border: rgba(20,184,166,0.15);
+    --card-bg: rgba(30,41,59,0.8);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Outfit',sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    min-height:100vh; color:var(--text);
+  }
+  .bg-fixed {
+    position:fixed; inset:0; pointer-events:none;
+    background: radial-gradient(ellipse at 10% 30%, rgba(13,148,136,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 70%, rgba(6,182,212,0.06) 0%, transparent 50%);
+  }
+  
+  /* NAVBAR */
+  nav {
+    position:sticky; top:0; z-index:100;
+    background: rgba(15,23,42,0.9); backdrop-filter:blur(20px);
+    border-bottom: 1px solid rgba(20,184,166,0.1);
+    padding: 0 24px; height:64px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .nav-brand { display:flex; align-items:center; gap:10px; }
+  .nav-icon {
+    width:36px; height:36px;
+    background: linear-gradient(135deg, var(--teal-dark), var(--teal-light));
+    border-radius:10px; display:flex; align-items:center; justify-content:center;
+    font-size:18px;
+  }
+  .nav-title { font-family:'DM Serif Display',serif; font-size:20px; color:var(--text); }
+  
+  .nav-right { display:flex; align-items:center; gap:8px; }
+  .nav-btn {
+    padding:8px 14px; border-radius:10px;
+    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
+    color:var(--text-muted); font-family:'Outfit',sans-serif; font-size:13px;
+    cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px;
+    text-decoration:none;
+  }
+  .nav-btn:hover { background:rgba(13,148,136,0.15); border-color:var(--teal); color:var(--teal-light); }
+  .nav-btn.danger:hover { background:rgba(248,113,113,0.1); border-color:#f87171; color:#f87171; }
+  .nav-user {
+    display:flex; align-items:center; gap:8px;
+    padding:6px 12px; border-radius:10px;
+    background:rgba(13,148,136,0.1); border:1px solid rgba(13,148,136,0.2);
+  }
+  .nav-avatar {
+    width:28px; height:28px; border-radius:8px;
+    background: linear-gradient(135deg, var(--teal-dark), var(--teal-light));
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; font-weight:600;
+  }
+  .nav-username { font-size:13px; font-weight:500; color:var(--teal-light); }
+  
+  /* MAIN */
+  main { max-width:1100px; margin:0 auto; padding:32px 24px; position:relative; z-index:1; }
+  
+  .page-header { margin-bottom:32px; }
+  .page-header h1 {
+    font-family:'DM Serif Display',serif;
+    font-size:32px; color:var(--text); margin-bottom:6px;
+  }
+  .page-header p { color:var(--text-muted); font-size:15px; }
+  
+  /* PROGRESS */
+  .progress-bar {
+    display:flex; gap:0; margin-bottom:32px;
+    background: var(--card-bg); border:1px solid var(--glass-border);
+    border-radius:16px; padding:4px; overflow:hidden;
+  }
+  .progress-step {
+    flex:1; padding:12px 16px; border-radius:12px;
+    text-align:center; cursor:pointer; transition:all 0.3s;
+    font-size:13px; font-weight:500; color:var(--text-muted);
+    display:flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .progress-step.active {
+    background: linear-gradient(135deg, rgba(13,148,136,0.3), rgba(20,184,166,0.15));
+    border:1px solid rgba(20,184,166,0.3); color:var(--teal-light);
+  }
+  .progress-step.done { color:var(--teal-light); }
+  .step-num {
+    width:22px; height:22px; border-radius:6px;
+    background:rgba(255,255,255,0.08); font-size:12px;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .progress-step.active .step-num { background:var(--teal); color:white; }
+  .progress-step.done .step-num { background:var(--teal-dark); color:white; }
+  
+  /* SECTIONS */
+  .section { display:none; animation:fadeIn 0.3s ease; }
+  .section.active { display:block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  
+  /* CARDS */
+  .form-card {
+    background: var(--card-bg);
+    border:1px solid var(--glass-border);
+    border-radius:20px; padding:28px; margin-bottom:20px;
+    backdrop-filter:blur(10px);
+  }
+  .form-card-title {
+    font-size:16px; font-weight:600; color:var(--text);
+    margin-bottom:20px; display:flex; align-items:center; gap:10px;
+  }
+  .form-card-title span { font-size:20px; }
+  
+  .form-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; }
+  .form-group { position:relative; }
+  .form-label { display:block; font-size:12px; font-weight:500; color:var(--text-muted); margin-bottom:7px; }
+  .form-input, .form-select {
+    width:100%; padding:11px 14px;
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:10px; color:var(--text);
+    font-family:'Outfit',sans-serif; font-size:14px; outline:none;
+    transition:all 0.2s;
+  }
+  .form-select { appearance:none; cursor:pointer; }
+  .form-input::placeholder { color:rgba(148,163,184,0.4); }
+  .form-input:focus, .form-select:focus {
+    border-color:var(--teal);
+    background:rgba(13,148,136,0.06);
+    box-shadow:0 0 0 3px rgba(13,148,136,0.12);
+  }
+  .form-unit {
+    position:absolute; right:12px; top:35px;
+    font-size:11px; color:var(--text-muted);
+    pointer-events:none;
+  }
+  
+  /* BMI Indicator */
+  .bmi-display {
+    background:rgba(13,148,136,0.08); border:1px solid rgba(13,148,136,0.2);
+    border-radius:12px; padding:14px 18px;
+    display:flex; align-items:center; gap:16px; margin-top:4px;
+  }
+  .bmi-value { font-size:28px; font-weight:700; color:var(--teal-light); }
+  .bmi-label { font-size:13px; color:var(--text-muted); }
+  .bmi-cat { font-size:14px; font-weight:600; }
+  
+  /* Toggle Radio */
+  .toggle-group { display:flex; gap:8px; }
+  .toggle-btn {
+    flex:1; padding:9px 12px; border-radius:8px;
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+    color:var(--text-muted); font-family:'Outfit',sans-serif; font-size:13px;
+    cursor:pointer; transition:all 0.2s; text-align:center;
+  }
+  .toggle-btn.yes.active { background:rgba(248,113,113,0.15); border-color:#f87171; color:#fca5a5; }
+  .toggle-btn.no.active { background:rgba(52,211,153,0.15); border-color:#34d399; color:#6ee7b7; }
+  
+  /* SYMPTOMS */
+  .symptoms-grid { display:flex; flex-wrap:wrap; gap:10px; }
+  .symptom-chip {
+    padding:8px 14px; border-radius:20px;
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+    color:var(--text-muted); font-size:13px; cursor:pointer;
+    transition:all 0.2s; user-select:none;
+  }
+  .symptom-chip:hover { border-color:var(--teal); color:var(--text); }
+  .symptom-chip.active {
+    background:rgba(13,148,136,0.2); border-color:var(--teal);
+    color:var(--teal-light); font-weight:500;
+  }
+  
+  /* NAVIGATION BUTTONS */
+  .btn-row { display:flex; justify-content:space-between; margin-top:28px; gap:12px; }
+  .btn-back, .btn-next, .btn-submit {
+    padding:13px 28px; border-radius:12px;
+    font-family:'Outfit',sans-serif; font-size:15px; font-weight:600;
+    cursor:pointer; transition:all 0.2s; border:none;
+  }
+  .btn-back {
+    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+    color:var(--text-muted);
+  }
+  .btn-back:hover { background:rgba(255,255,255,0.1); color:var(--text); }
+  .btn-next, .btn-submit {
+    background:linear-gradient(135deg, var(--teal-dark), var(--teal-light));
+    color:white; box-shadow:0 4px 20px rgba(13,148,136,0.35);
+    min-width:160px;
+  }
+  .btn-next:hover, .btn-submit:hover { transform:translateY(-1px); box-shadow:0 6px 25px rgba(13,148,136,0.5); }
+  .btn-submit:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+  .spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; margin-right:6px; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  
+  .alert { padding:12px 16px; border-radius:10px; font-size:13px; margin-bottom:16px; display:none; }
+  .alert-error { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:#fca5a5; }
+  .alert.show { display:block; }
+</style>
+</head>
+<body>
+<div class="bg-fixed"></div>
+ 
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-brand">
+    <div class="nav-icon">🏥</div>
+    <span class="nav-title">MédiDiag</span>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user">
+      <div class="nav-avatar" id="navAvatar">?</div>
+      <span class="nav-username" id="navUsername">Chargement...</span>
+    </div>
+    <a href="dashboard.html" class="nav-btn">📊 Historique</a>
+    <a href="settings.html" class="nav-btn">⚙️ Paramètres</a>
+    <button class="nav-btn danger" onclick="logout()">🚪 Déconnexion</button>
+  </div>
+</nav>
+ 
+<main>
+  <div class="page-header">
+    <h1>Formulaire Médical</h1>
+    <p>Remplissez ce formulaire pour obtenir une analyse de votre état de santé</p>
+  </div>
+  
+  <div class="alert alert-error" id="alertError"></div>
+  
+  <!-- Progress Steps -->
+  <div class="progress-bar">
+    <div class="progress-step active" id="step-tab-1"><span class="step-num">1</span> Informations</div>
+    <div class="progress-step" id="step-tab-2"><span class="step-num">2</span> Habitudes</div>
+    <div class="progress-step" id="step-tab-3"><span class="step-num">3</span> Symptômes</div>
+    <div class="progress-step" id="step-tab-4"><span class="step-num">4</span> Antécédents</div>
+  </div>
+  
+  <!-- STEP 1: Personal Info -->
+  <div class="section active" id="section-1">
+    <div class="form-card">
+      <div class="form-card-title"><span>👤</span> Informations personnelles</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Date de naissance *</label>
+          <input type="date" id="birthdate" class="form-input" onchange="calcAge()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Âge (calculé)</label>
+          <input type="number" id="age" class="form-input" placeholder="Âge en années" min="1" max="120" readonly style="opacity:0.6">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sexe *</label>
+          <select id="gender" class="form-select">
+            <option value="">-- Sélectionner --</option>
+            <option value="M">Masculin</option>
+            <option value="F">Féminin</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-grid" style="margin-top:16px">
+        <div class="form-group">
+          <label class="form-label">Taille *</label>
+          <input type="number" id="height" class="form-input" placeholder="170" min="100" max="250" oninput="calcBMI()">
+          <span class="form-unit">cm</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Poids *</label>
+          <input type="number" id="weight" class="form-input" placeholder="70" min="20" max="300" oninput="calcBMI()">
+          <span class="form-unit">kg</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Groupe sanguin</label>
+          <select id="bloodGroup" class="form-select">
+            <option value="">Inconnu</option>
+            <option>A+</option><option>A-</option>
+            <option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option>
+            <option>O+</option><option>O-</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-card" id="bmiCard" style="display:none">
+      <div class="form-card-title"><span>📏</span> Indice de Masse Corporelle (IMC)</div>
+      <div class="bmi-display">
+        <div>
+          <div class="bmi-value" id="bmiValue">--</div>
+          <div class="bmi-label">kg/m²</div>
+        </div>
+        <div>
+          <div class="bmi-cat" id="bmiCat">--</div>
+          <div class="bmi-label" id="bmiDesc">Entrez votre taille et poids</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="btn-row">
+      <div></div>
+      <button class="btn-next" onclick="nextStep(1)">Suivant →</button>
+    </div>
+  </div>
+  
+  <!-- STEP 2: Habits -->
+  <div class="section" id="section-2">
+    <div class="form-card">
+      <div class="form-card-title"><span>🚬</span> Habitudes de vie</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Fumeur ?</label>
+          <div class="toggle-group">
+            <div class="toggle-btn yes" onclick="setToggle('smoker', true, this)">🚬 Oui</div>
+            <div class="toggle-btn no active" onclick="setToggle('smoker', false, this)">✅ Non</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Consommation d'alcool ?</label>
+          <div class="toggle-group">
+            <div class="toggle-btn yes" onclick="setToggle('alcohol', true, this)">🍺 Oui</div>
+            <div class="toggle-btn no active" onclick="setToggle('alcohol', false, this)">✅ Non</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Activité physique régulière ?</label>
+          <div class="toggle-group">
+            <div class="toggle-btn no" onclick="setToggle('exercise', true, this)">🏃 Oui</div>
+            <div class="toggle-btn yes active" onclick="setToggle('exercise', false, this)">❌ Non</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stress fréquent ?</label>
+          <div class="toggle-group">
+            <div class="toggle-btn yes" onclick="setToggle('stress', true, this)">😟 Oui</div>
+            <div class="toggle-btn no active" onclick="setToggle('stress', false, this)">✅ Non</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-card">
+      <div class="form-card-title"><span>🥗</span> Alimentation</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Type d'alimentation</label>
+          <select id="diet" class="form-select">
+            <option value="">Non spécifié</option>
+            <option value="balanced">Équilibrée</option>
+            <option value="fast_food">Fast-food fréquent</option>
+            <option value="vegetarian">Végétarienne</option>
+            <option value="vegan">Végane</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Heures de sommeil / nuit</label>
+          <input type="number" id="sleep" class="form-input" placeholder="7-8 heures" min="2" max="14">
+          <span class="form-unit">h</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="btn-row">
+      <button class="btn-back" onclick="prevStep(2)">← Retour</button>
+      <button class="btn-next" onclick="nextStep(2)">Suivant →</button>
+    </div>
+  </div>
+  
+  <!-- STEP 3: Symptoms -->
+  <div class="section" id="section-3">
+    <div class="form-card">
+      <div class="form-card-title"><span>🩺</span> Symptômes ressentis</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Sélectionnez tous les symptômes que vous ressentez actuellement (peut être multiple)</p>
+      <div class="symptoms-grid" id="symptomsGrid">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+    
+    <div class="form-card">
+      <div class="form-card-title"><span>⏱️</span> Durée des symptômes</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Depuis combien de temps ?</label>
+          <select id="symptomDuration" class="form-select">
+            <option value="">Non applicable</option>
+            <option value="today">Aujourd'hui</option>
+            <option value="few_days">Quelques jours</option>
+            <option value="week">Une semaine</option>
+            <option value="month">Un mois</option>
+            <option value="months">Plusieurs mois</option>
+            <option value="year">Plus d'un an</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Intensité globale (1-10)</label>
+          <input type="range" id="intensity" min="1" max="10" value="5" 
+                 style="width:100%;accent-color:var(--teal);margin-top:8px" 
+                 oninput="document.getElementById('intensityVal').textContent=this.value">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-top:4px">
+            <span>Faible</span><span id="intensityVal">5</span><span>Élevée</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="btn-row">
+      <button class="btn-back" onclick="prevStep(3)">← Retour</button>
+      <button class="btn-next" onclick="nextStep(3)">Suivant →</button>
+    </div>
+  </div>
+  
+  <!-- STEP 4: Medical History -->
+  <div class="section" id="section-4">
+    <div class="form-card">
+      <div class="form-card-title"><span>📋</span> Antécédents médicaux</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Avez-vous des allergies ?</label>
+          <div class="toggle-group">
+            <div class="toggle-btn yes" onclick="setToggle('allergies', true, this)">⚠️ Oui</div>
+            <div class="toggle-btn no active" onclick="setToggle('allergies', false, this)">✅ Non</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Maladies chroniques ?</label>
+          <div class="toggle-group">
+            <div class="toggle-btn yes" onclick="setToggle('chronic_disease', true, this)">⚠️ Oui</div>
+            <div class="toggle-btn no active" onclick="setToggle('chronic_disease', false, this)">✅ Non</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prenez-vous des médicaments ?</label>
+          <div class="toggle-group">
+            <div class="toggle-btn yes" onclick="setToggle('medications', true, this)">💊 Oui</div>
+            <div class="toggle-btn no active" onclick="setToggle('medications', false, this)">✅ Non</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Antécédents familiaux ?</label>
+          <div class="toggle-group">
+            <div class="toggle-btn yes" onclick="setToggle('family_history', true, this)">🧬 Oui</div>
+            <div class="toggle-btn no active" onclick="setToggle('family_history', false, this)">✅ Non</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-card">
+      <div class="form-card-title"><span>ℹ️</span> Informations complémentaires</div>
+      <div class="form-group">
+        <label class="form-label">Notes supplémentaires (optionnel)</label>
+        <textarea id="notes" class="form-input" rows="3" 
+                  placeholder="Décrivez d'autres symptômes ou informations importantes..."
+                  style="resize:vertical"></textarea>
+      </div>
+    </div>
+    
+    <div class="btn-row">
+      <button class="btn-back" onclick="prevStep(4)">← Retour</button>
+      <button class="btn-submit" id="submitBtn" onclick="submitForm()">
+        🔍 Analyser ma santé
+      </button>
+    </div>
+  </div>
+  
+</main>
+ 
+<script>
+const API = 'http://127.0.0.1:5000/api';
+const token = localStorage.getItem('token');
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+ 
+if (!token) window.location.href = 'login.html';
+ 
+// Init user info in nav
+document.getElementById('navUsername').textContent = user.full_name || user.username || 'Utilisateur';
+document.getElementById('navAvatar').textContent = (user.full_name || user.username || 'U')[0].toUpperCase();
+ 
+// State
+const toggleState = {
+  smoker: false, alcohol: false, exercise: false, stress: false,
+  allergies: false, chronic_disease: false, medications: false, family_history: false
+};
+const selectedSymptoms = new Set();
+let currentStep = 1;
+ 
+// Symptoms list
+const SYMPTOMS = [
+  { id:'fatigue', label:'😴 Fatigue' },
+  { id:'headache', label:'🤕 Maux de tête' },
+  { id:'chest_pain', label:'💔 Douleur thoracique' },
+  { id:'shortness_breath', label:'😮‍💨 Essoufflement' },
+  { id:'dizziness', label:'💫 Vertiges' },
+  { id:'nausea', label:'🤢 Nausées' },
+  { id:'fever', label:'🌡️ Fièvre' },
+  { id:'joint_pain', label:'🦴 Douleurs articulaires' },
+  { id:'frequent_thirst', label:'💧 Soif excessive' },
+  { id:'frequent_urination', label:'🚽 Urination fréquente' },
+  { id:'blurred_vision', label:'👁️ Vision floue' },
+  { id:'cough', label:'😷 Toux persistante' },
+  { id:'pale_skin', label:'😶 Peau pâle' },
+  { id:'insomnia', label:'🌙 Insomnie' },
+  { id:'palpitations', label:'💗 Palpitations' },
+  { id:'back_pain', label:'🔙 Mal de dos' },
+  { id:'abdominal_pain', label:'🤧 Douleur abdominale' },
+  { id:'skin_rash', label:'🔴 Éruption cutanée' }
+];
+ 
+// Init symptoms grid
+function initSymptoms() {
+  const grid = document.getElementById('symptomsGrid');
+  grid.innerHTML = SYMPTOMS.map(s => `
+    <div class="symptom-chip" data-id="${s.id}" onclick="toggleSymptom('${s.id}', this)">
+      ${s.label}
+    </div>
+  `).join('');
+}
+ 
+function toggleSymptom(id, el) {
+  if (selectedSymptoms.has(id)) {
+    selectedSymptoms.delete(id);
+    el.classList.remove('active');
+  } else {
+    selectedSymptoms.add(id);
+    el.classList.add('active');
+  }
+}
+ 
+function setToggle(key, val, el) {
+  toggleState[key] = val;
+  const parent = el.parentElement;
+  parent.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+ 
+function calcAge() {
+  const bd = document.getElementById('birthdate').value;
+  if (!bd) return;
+  const age = Math.floor((new Date() - new Date(bd)) / (365.25 * 24 * 3600 * 1000));
+  document.getElementById('age').value = age;
+}
+ 
+function calcBMI() {
+  const h = parseFloat(document.getElementById('height').value);
+  const w = parseFloat(document.getElementById('weight').value);
+  if (!h || !w || h < 100 || w < 20) return;
+  const bmi = w / ((h/100)**2);
+  document.getElementById('bmiCard').style.display = 'block';
+  document.getElementById('bmiValue').textContent = bmi.toFixed(1);
+  
+  let cat, desc, color;
+  if (bmi < 18.5) { cat='Insuffisance pondérale'; desc='IMC inférieur à la normale'; color='#60a5fa'; }
+  else if (bmi < 25) { cat='Poids normal ✅'; desc='IMC dans la plage saine'; color='#34d399'; }
+  else if (bmi < 30) { cat='Surpoids ⚠️'; desc='IMC légèrement élevé'; color='#facc15'; }
+  else if (bmi < 35) { cat='Obésité modérée 🔶'; desc='IMC élevé - consultation recommandée'; color='#fb923c'; }
+  else { cat='Obésité sévère 🔴'; desc='IMC très élevé - consultation urgente'; color='#f87171'; }
+  
+  document.getElementById('bmiCat').textContent = cat;
+  document.getElementById('bmiCat').style.color = color;
+  document.getElementById('bmiDesc').textContent = desc;
+}
+ 
+function nextStep(from) {
+  if (from === 1) {
+    const age = document.getElementById('age').value;
+    const height = document.getElementById('height').value;
+    const weight = document.getElementById('weight').value;
+    const gender = document.getElementById('gender').value;
+    if (!age || !height || !weight || !gender) {
+      showError('Veuillez remplir tous les champs obligatoires'); return;
+    }
+  }
+  goToStep(from + 1);
+}
+ 
+function prevStep(from) { goToStep(from - 1); }
+ 
+function goToStep(step) {
+  document.getElementById(`section-${currentStep}`).classList.remove('active');
+  document.getElementById(`step-tab-${currentStep}`).classList.remove('active');
+  if (currentStep < step) document.getElementById(`step-tab-${currentStep}`).classList.add('done');
+  
+  currentStep = step;
+  document.getElementById(`section-${step}`).classList.add('active');
+  document.getElementById(`step-tab-${step}`).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+ 
+function showError(msg) {
+  const el = document.getElementById('alertError');
+  el.textContent = msg;
+  el.classList.add('show');
+  el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  setTimeout(() => el.classList.remove('show'), 5000);
+}
+ 
+async function submitForm() {
+  const formData = {
+    age: parseInt(document.getElementById('age').value),
+    gender: document.getElementById('gender').value,
+    height: parseFloat(document.getElementById('height').value),
+    weight: parseFloat(document.getElementById('weight').value),
+    blood_group: document.getElementById('bloodGroup').value,
+    diet: document.getElementById('diet').value,
+    sleep_hours: parseFloat(document.getElementById('sleep').value) || null,
+    symptoms: Array.from(selectedSymptoms),
+    symptom_duration: document.getElementById('symptomDuration').value,
+    symptom_intensity: parseInt(document.getElementById('intensity').value),
+    notes: document.getElementById('notes').value,
+    ...toggleState
+  };
+  
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Analyse en cours...';
+  
+  try {
+    const res = await fetch(`${API}/predict`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(formData)
+    });
+    
+    if (res.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = 'login.html'; return;
+    }
+    
+    const data = await res.json();
+    if (!res.ok) { showError(data.error || 'Erreur lors de l\'analyse'); return; }
+    
+    localStorage.setItem('lastResult', JSON.stringify(data));
+    window.location.href = 'result.html';
+  } catch(e) {
+    showError('Erreur de connexion au serveur.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🔍 Analyser ma santé';
+  }
+}
+ 
+function logout() {
+  if (confirm('Voulez-vous vous déconnecter ?')) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'login.html';
+  }
+}
+ 
+// Init
+initSymptoms();
+</script>
+</body>
+</html>

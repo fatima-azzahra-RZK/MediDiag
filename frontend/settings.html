@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MédiDiag - Paramètres</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal:#0d9488; --teal-light:#14b8a6; --teal-dark:#0f766e;
+    --navy:#0f172a; --text:#e2e8f0; --text-muted:#94a3b8;
+    --card-bg:rgba(30,41,59,0.85); --glass-border:rgba(20,184,166,0.15);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Outfit',sans-serif; background:linear-gradient(135deg,#0f172a,#1e293b); min-height:100vh; color:var(--text); }
+  .bg-fixed { position:fixed; inset:0; pointer-events:none; background:radial-gradient(ellipse at 80% 20%, rgba(13,148,136,0.08) 0%, transparent 50%); }
+  nav { position:sticky; top:0; z-index:100; background:rgba(15,23,42,0.9); backdrop-filter:blur(20px); border-bottom:1px solid rgba(20,184,166,0.1); padding:0 24px; height:64px; display:flex; align-items:center; justify-content:space-between; }
+  .nav-brand { display:flex; align-items:center; gap:10px; }
+  .nav-icon { width:36px; height:36px; background:linear-gradient(135deg,var(--teal-dark),var(--teal-light)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .nav-title { font-family:'DM Serif Display',serif; font-size:20px; }
+  .nav-right { display:flex; gap:8px; }
+  .nav-btn { padding:8px 14px; border-radius:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:var(--text-muted); font-family:'Outfit',sans-serif; font-size:13px; cursor:pointer; transition:all 0.2s; text-decoration:none; display:flex; align-items:center; gap:6px; }
+  .nav-btn:hover { background:rgba(13,148,136,0.15); border-color:var(--teal); color:var(--teal-light); }
+  .nav-btn.danger:hover { background:rgba(248,113,113,0.1); border-color:#f87171; color:#f87171; }
+  
+  main { max-width:800px; margin:0 auto; padding:32px 24px; position:relative; z-index:1; }
+  .page-header { margin-bottom:28px; }
+  .page-header h1 { font-family:'DM Serif Display',serif; font-size:30px; margin-bottom:4px; }
+  .page-header p { color:var(--text-muted); font-size:14px; }
+  
+  .settings-section { margin-bottom:24px; }
+  .settings-card { background:var(--card-bg); border:1px solid var(--glass-border); border-radius:20px; padding:24px 28px; }
+  .settings-title { font-size:16px; font-weight:600; color:var(--text); margin-bottom:20px; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:14px; }
+  
+  .form-group { margin-bottom:16px; }
+  .form-label { display:block; font-size:12px; font-weight:500; color:var(--text-muted); margin-bottom:7px; }
+  .form-input {
+    width:100%; padding:11px 14px;
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+    border-radius:10px; color:var(--text); font-family:'Outfit',sans-serif; font-size:14px; outline:none; transition:all 0.2s;
+  }
+  .form-input::placeholder { color:rgba(148,163,184,0.4); }
+  .form-input:focus { border-color:var(--teal); background:rgba(13,148,136,0.06); box-shadow:0 0 0 3px rgba(13,148,136,0.12); }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  
+  /* Language selector */
+  .lang-grid { display:flex; gap:12px; flex-wrap:wrap; }
+  .lang-option {
+    flex:1; min-width:100px; padding:14px; border-radius:12px;
+    background:rgba(255,255,255,0.04); border:2px solid rgba(255,255,255,0.08);
+    text-align:center; cursor:pointer; transition:all 0.2s;
+  }
+  .lang-option:hover { border-color:var(--teal); }
+  .lang-option.active { background:rgba(13,148,136,0.15); border-color:var(--teal); }
+  .lang-flag { font-size:28px; display:block; margin-bottom:6px; }
+  .lang-name { font-size:13px; font-weight:500; color:var(--text-muted); }
+  .lang-option.active .lang-name { color:var(--teal-light); }
+  
+  /* Theme toggle */
+  .theme-grid { display:flex; gap:12px; }
+  .theme-option { flex:1; padding:14px; border-radius:12px; background:rgba(255,255,255,0.04); border:2px solid rgba(255,255,255,0.08); text-align:center; cursor:pointer; transition:all 0.2s; }
+  .theme-option:hover { border-color:var(--teal); }
+  .theme-option.active { background:rgba(13,148,136,0.15); border-color:var(--teal); }
+  .theme-icon { font-size:24px; margin-bottom:6px; }
+  .theme-name { font-size:13px; color:var(--text-muted); }
+  
+  /* Action buttons */
+  .btn-save { padding:12px 28px; border-radius:12px; background:linear-gradient(135deg,var(--teal-dark),var(--teal-light)); color:white; font-family:'Outfit',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; border:none; box-shadow:0 4px 15px rgba(13,148,136,0.3); }
+  .btn-save:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(13,148,136,0.5); }
+  .btn-save:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+  .btn-danger { padding:12px 28px; border-radius:12px; background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:#fca5a5; font-family:'Outfit',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; }
+  .btn-danger:hover { background:rgba(248,113,113,0.2); }
+  .btn-row { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+  
+  .alert { padding:12px 16px; border-radius:10px; font-size:13px; margin-top:12px; display:none; }
+  .alert-error { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:#fca5a5; }
+  .alert-success { background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3); color:#6ee7b7; }
+  .alert.show { display:block; }
+  
+  .spinner { display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; margin-right:6px; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  
+  /* Profile avatar */
+  .profile-avatar {
+    width:72px; height:72px; border-radius:20px;
+    background:linear-gradient(135deg,var(--teal-dark),var(--teal-light));
+    display:flex; align-items:center; justify-content:center;
+    font-size:32px; font-weight:700; margin-bottom:20px;
+    box-shadow:0 0 30px rgba(13,148,136,0.3);
+  }
+</style>
+</head>
+<body>
+<div class="bg-fixed"></div>
+ 
+<nav>
+  <div class="nav-brand">
+    <div class="nav-icon">🏥</div>
+    <span class="nav-title">MédiDiag</span>
+  </div>
+  <div class="nav-right">
+    <a href="form.html" class="nav-btn">📝 Analyse</a>
+    <a href="dashboard.html" class="nav-btn">📊 Historique</a>
+    <button class="nav-btn danger" onclick="logout()">🚪 Déconnexion</button>
+  </div>
+</nav>
+ 
+<main>
+  <div class="page-header">
+    <h1>Paramètres</h1>
+    <p>Gérez votre profil, langue et préférences</p>
+  </div>
+  
+  <!-- PROFILE -->
+  <div class="settings-section">
+    <div class="settings-card">
+      <div class="settings-title"><span>👤</span> Mon profil</div>
+      <div class="profile-avatar" id="profileAvatar">?</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nom complet</label>
+          <input type="text" id="fullName" class="form-input" placeholder="Votre nom">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="email" class="form-input" placeholder="email@exemple.com">
+        </div>
+      </div>
+      <div class="alert alert-error" id="profileError"></div>
+      <div class="alert alert-success" id="profileSuccess"></div>
+      <div class="btn-row">
+        <button class="btn-save" id="saveProfileBtn" onclick="saveProfile()">Enregistrer le profil</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- PASSWORD -->
+  <div class="settings-section">
+    <div class="settings-card">
+      <div class="settings-title"><span>🔒</span> Changer le mot de passe</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nouveau mot de passe</label>
+          <input type="password" id="newPwd" class="form-input" placeholder="Min. 6 caractères">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirmer le mot de passe</label>
+          <input type="password" id="confirmPwd" class="form-input" placeholder="Répétez">
+        </div>
+      </div>
+      <div class="alert alert-error" id="pwdError"></div>
+      <div class="alert alert-success" id="pwdSuccess"></div>
+      <div class="btn-row">
+        <button class="btn-save" onclick="savePassword()">Changer le mot de passe</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- LANGUAGE -->
+  <div class="settings-section">
+    <div class="settings-card">
+      <div class="settings-title"><span>🌐</span> Langue de l'interface</div>
+      <div class="lang-grid">
+        <div class="lang-option" data-lang="fr" onclick="setLang('fr', this)">
+          <span class="lang-flag">🇫🇷</span>
+          <span class="lang-name">Français</span>
+        </div>
+        <div class="lang-option" data-lang="ar" onclick="setLang('ar', this)">
+          <span class="lang-flag">🇲🇦</span>
+          <span class="lang-name">العربية</span>
+        </div>
+        <div class="lang-option" data-lang="en" onclick="setLang('en', this)">
+          <span class="lang-flag">🇬🇧</span>
+          <span class="lang-name">English</span>
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:12px;color:var(--text-muted)">
+        La langue sélectionnée sera appliquée à toutes les pages
+      </div>
+    </div>
+  </div>
+  
+  <!-- DANGER ZONE -->
+  <div class="settings-section">
+    <div class="settings-card" style="border-color:rgba(248,113,113,0.2)">
+      <div class="settings-title" style="color:#fca5a5"><span>⚠️</span> Zone de danger</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">
+        Ces actions sont irréversibles. Procédez avec précaution.
+      </p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button class="btn-danger" onclick="clearHistory()">🗑️ Supprimer tout l'historique</button>
+        <button class="btn-danger" onclick="deleteAccount()">❌ Supprimer mon compte</button>
+      </div>
+    </div>
+  </div>
+  
+</main>
+ 
+<script>
+const API = 'http://127.0.0.1:5000/api';
+const token = localStorage.getItem('token');
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+if (!token) window.location.href = 'login.html';
+ 
+// Init form
+document.getElementById('fullName').value = user.full_name || '';
+document.getElementById('email').value = user.email || '';
+const initial = (user.full_name || user.username || 'U')[0].toUpperCase();
+document.getElementById('profileAvatar').textContent = initial;
+ 
+// Language
+const currentLang = localStorage.getItem('lang') || 'fr';
+document.querySelectorAll('.lang-option').forEach(el => {
+  if (el.dataset.lang === currentLang) el.classList.add('active');
+});
+ 
+function setLang(lang, el) {
+  localStorage.setItem('lang', lang);
+  document.querySelectorAll('.lang-option').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  document.body.style.direction = lang === 'ar' ? 'rtl' : 'ltr';
+  showMsg('profileSuccess', '✅ Langue mise à jour');
+}
+ 
+function showMsg(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+ 
+async function saveProfile() {
+  const fullName = document.getElementById('fullName').value.trim();
+  const email = document.getElementById('email').value.trim();
+  
+  if (!email) { showMsg('profileError', 'Email requis'); return; }
+  
+  const btn = document.getElementById('saveProfileBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Enregistrement...';
+  
+  try {
+    const res = await fetch(`${API}/profile`, {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
+      body: JSON.stringify({ full_name: fullName, email, language: currentLang })
+    });
+    const data = await res.json();
+    if (!res.ok) { showMsg('profileError', data.error || 'Erreur'); return; }
+    
+    // Update local storage
+    user.full_name = fullName;
+    user.email = email;
+    localStorage.setItem('user', JSON.stringify(user));
+    document.getElementById('profileAvatar').textContent = (fullName || 'U')[0].toUpperCase();
+    showMsg('profileSuccess', '✅ Profil mis à jour avec succès');
+  } catch(e) {
+    showMsg('profileError', 'Erreur de connexion');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Enregistrer le profil';
+  }
+}
+ 
+async function savePassword() {
+  const np = document.getElementById('newPwd').value;
+  const cp = document.getElementById('confirmPwd').value;
+  
+  if (!np) { showMsg('pwdError', 'Entrez un nouveau mot de passe'); return; }
+  if (np.length < 6) { showMsg('pwdError', 'Minimum 6 caractères'); return; }
+  if (np !== cp) { showMsg('pwdError', 'Les mots de passe ne correspondent pas'); return; }
+  
+  try {
+    const res = await fetch(`${API}/profile`, {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
+      body: JSON.stringify({ new_password: np })
+    });
+    const data = await res.json();
+    if (!res.ok) { showMsg('pwdError', data.error || 'Erreur'); return; }
+    document.getElementById('newPwd').value = '';
+    document.getElementById('confirmPwd').value = '';
+    showMsg('pwdSuccess', '✅ Mot de passe modifié avec succès');
+  } catch(e) {
+    showMsg('pwdError', 'Erreur de connexion');
+  }
+}
+ 
+async function clearHistory() {
+  if (!confirm('Supprimer tout votre historique d\'analyses ? Cette action est irréversible.')) return;
+  // Delete all entries one by one (simplified)
+  try {
+    const res = await fetch(`${API}/history`, { headers: { 'Authorization':`Bearer ${token}` } });
+    const data = await res.json();
+    for (const item of (data.history || [])) {
+      await fetch(`${API}/history/${item.id}`, { method:'DELETE', headers: { 'Authorization':`Bearer ${token}` } });
+    }
+    alert('Historique supprimé avec succès.');
+  } catch(e) { alert('Erreur lors de la suppression.'); }
+}
+ 
+function deleteAccount() {
+  if (confirm('⚠️ ATTENTION: Supprimer définitivement votre compte et toutes vos données ? Cette action est IRRÉVERSIBLE.')) {
+    if (confirm('Êtes-vous vraiment sûr(e) ? Toutes vos données seront perdues.')) {
+      // In a real app, call DELETE /api/account
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      alert('Compte supprimé. Au revoir !');
+      window.location.href = 'login.html';
+    }
+  }
+}
+ 
+function logout() {
+  if (confirm('Se déconnecter ?')) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'login.html';
+  }
+}
+</script>
+</body>
+</html>
